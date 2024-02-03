@@ -106,96 +106,44 @@
         damage: 200,
         alive: true,
       };
+      //Tillegsfunksjonalitet 1.
+      document.getElementById("warrior-health-txt").innerHTML = "600/600 HP";
+      document.getElementById("warrior-name-txt").innerHTML =
+        "<strong>Wyona Warrior</strong>";
 
+      document.getElementById("archer-health-txt").innerHTML = "500/500 HP";
+      document.getElementById("archer-name-txt").innerHTML =
+        "<strong>Ariana Archer</strong>";
+
+      document.getElementById("healer-name-txt").innerHTML =
+        "<strong>Henriette Healer</strong>";
+
+      document.getElementById("dragon-name-txt").innerHTML =
+        "<strong>Daar Dragon</strong>";
+
+      // 1. funksjon for at helten skal angripe og skade dragen
       function attackDragon(hero) {
         if (hero.alive && dragonObject.alive) {
           dragonObject.currentHP -= hero.damage;
 
-          // Oppdater healthbaren til dragen
-          let dragonHealthBar = document.querySelector(
-            ".healthbar.dragon-health"
-          );
-          let percentage = (dragonObject.currentHP / dragonObject.maxHP) * 100;
-          dragonHealthBar.style.width = percentage + "%";
-
-          // Oppdater tekst for dragens helse
+          // Oppdater tekst for dragens helse, tilleggsfunksjonalitet 1.
           let dragonHealthText = document.querySelector(".dragon-health-txt");
           dragonHealthText.textContent =
             dragonObject.currentHP + " / " + dragonObject.maxHP + " HP";
 
-          if (dragonObject.currentHP > 0) {
-            alert(`${hero.name} gjorde ${hero.damage} skade på dragen`);
-            dragonCounterAttack();
-          } else if (dragonObject.currentHP <= 0) {
-            alert("Du bekjempet dragen");
-          }
-        }
-      }
+          alert(`${hero.name} gjorde ${hero.damage} skade på dragen`);
 
-      function updateHeroInfo(hero) {
-        let heroHealthBar, heroHealthText;
-
-        switch (hero.id) {
-          case 0: // Henriette Healer
-            heroHealthBar = document.querySelector(".healthbar.healer-health");
-            heroHealthText = document.querySelector("#healer-health-txt");
-            break;
-          case 1: // Ariana Archer
-            heroHealthBar = document.querySelector(".healthbar.archer-health");
-            heroHealthText = document.querySelector("#archer-health-txt");
-            break;
-          case 2: // Wyona Warrior
-            heroHealthBar = document.querySelector(".healthbar.warrior-health");
-            heroHealthText = document.querySelector("#warrior-health-txt");
-            break;
-          // Legg til flere cases for andre helter om nødvendig
-        }
-
-        if (heroHealthBar && heroHealthText) {
-          let percentage = (hero.currentHP / hero.maxHP) * 100;
-          // Bruk Math.min for å begrense verdien til maksimalt 100%
-          console.log("Percentage before update:", percentage);
-          let maxWidth = heroHealthBar.parentElement.offsetWidth;
-          heroHealthBar.style.width =
-            Math.min(Math.max((percentage / 100) * maxWidth, 0), maxWidth) +
-            "px";
-
-          console.log(
-            "Health bar width after update:",
-            heroHealthBar.style.width
-          );
-
-          if (hero.currentHP <= 0) {
-            hero.alive = false;
-            hero.currentHP = 0; // Sørger for at currentHP ikke går under 0
-            heroHealthText.textContent = "Drept";
+          if (dragonObject.currentHP <= 0) {
+            gameWon();
           } else {
-            heroHealthText.textContent = `${hero.currentHP} / ${hero.maxHP} HP`;
-            // Fjern alerten her for øyeblikket
-            alert(
-              `${hero.name} ble angrepet av dragen for ${dragonObject.damage} skade!`
-            );
+            dragonCounterAttack(hero);
           }
+
+          console.log("Updated dragonObject: ", dragonObject);
         }
       }
 
-      function dragonCounterAttack() {
-        if (dragonObject.alive) {
-          // Velg en tilfeldig helt
-          let randomHeroIndex = Math.floor(Math.random() * heroesArray.length);
-          let heroDefended = heroesArray[randomHeroIndex];
-
-          // Sjekk om den tilfeldige helten er i live
-          if (heroDefended.alive) {
-            // Reduser den tilfeldige heltens liv basert på dragens motangrep
-            heroDefended.currentHP -= dragonObject.damage;
-
-            // Oppdater healthbaren og tekst for den tilfeldige heltens helse
-            updateHeroInfo(heroDefended);
-          }
-        }
-      }
-
+      // 1. evenlistener for hver helt som hører etter klikk og kjører funksjonen.
       let wyonaWarrior = document.querySelector(".img-container.warrior");
       wyonaWarrior.addEventListener("click", function () {
         let heroIndex = 2;
@@ -213,6 +161,99 @@
         let heroIndex = 0;
         attackDragon(heroesArray[heroIndex]); // Henriette Healer er på index 0 i heroesArray
       });
+
+      // 2. Dragens motangrep
+      function dragonCounterAttack() {
+        if (dragonObject.alive) {
+          // Velg en tilfeldig helt
+          let randomHeroIndex = Math.floor(Math.random() * heroesArray.length);
+          let hero = heroesArray[randomHeroIndex];
+
+          if (hero.alive) {
+            // Reduser den tilfeldige heltens liv basert på dragens motangrep
+            hero.currentHP -= dragonObject.damage;
+            alert(
+              `${hero.name} ble angrepet av dragen for ${dragonObject.damage} skade!`
+            );
+
+            heroStatus(hero);
+          } else {
+            // If the selected hero is already dead, recursively call the function again.
+            dragonCounterAttack();
+          }
+
+          // Oppdater healthbaren og tekst for den tilfeldige heltens helse
+        }
+      }
+
+      // 3. Heltens status
+      function heroStatus(hero) {
+        let heroHealthText, heroImageContainer;
+
+        switch (hero.id) {
+          case 0: // Henriette Healer
+            heroHealthText = document.querySelector("#healer-health-txt");
+            heroImageContainer = document.querySelector(
+              ".img-container.healer"
+            );
+            break;
+          case 1: // Ariana Archer
+            heroHealthText = document.querySelector("#archer-health-txt");
+            heroImageContainer = document.querySelector(
+              ".img-container.archer"
+            );
+            break;
+          case 2: // Wyona Warrior
+            heroHealthText = document.querySelector("#warrior-health-txt");
+            heroImageContainer = document.querySelector(
+              ".img-container.warrior"
+            );
+            break;
+        }
+
+        // Tilleggsfunksjonalitet 1.
+        heroHealthText.textContent = `${hero.currentHP} / ${hero.maxHP} HP`;
+
+        console.log("Updated heroesArray:", heroesArray);
+
+        if (hero.currentHP <= 0) {
+          hero.alive = false;
+          hero.currentHP = 0;
+          heroHealthText.textContent = "Drept";
+
+          if (heroImageContainer) {
+            heroImageContainer.remove();
+          }
+        }
+
+        // SJekk om spillet er over
+        if (isGameOver()) {
+          alert(`Spillet er tapt! ${dragonObject.name} har vunnet!`);
+        }
+      }
+
+      //4.
+      function isGameOver() {
+        return heroesArray.every((hero) => !hero.alive);
+      }
+
+      // function
+      function gameWon() {
+        if (dragonObject.currentHP <= 0) {
+          dragonObject.alive = false;
+          dragonObject.currentHP = 0;
+          alert("Du bekjempet dragen");
+
+          // Remove dragon's image container
+          let dragonImageContainer = document.querySelector(
+            ".img-container.dragon-container"
+          );
+          if (dragonImageContainer) {
+            dragonImageContainer.remove();
+            console.log("Dragon has been removed from the battle.");
+          }
+        }
+      }
     </script>
   </body>
 </html>
